@@ -18,5 +18,6 @@ export interface CityInfo {
   lng: number
   ranking: number;
   id: number;
+  similar_value: number;
 };
 

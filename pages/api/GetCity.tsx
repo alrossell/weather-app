@@ -14,6 +14,9 @@ let table: number[][];
 
 function CitySuggestion(first: string, second: string): number {
 
+  first = first.toLowerCase();
+  second = second.toLowerCase();
+
   function calc(row: number, col: number): number {
     const insertion = col >= 1 ? table[row][col - 1] + 1 : Number.MAX_SAFE_INTEGER;
     const deletion = row >= 1 ? table[row - 1][col] + 1 : Number.MAX_SAFE_INTEGER;
@@ -58,7 +61,7 @@ function CitySuggestion(first: string, second: string): number {
   return table[first.length - 1][second.length - 1];
 }
 
-function ArrayToCityInto(input: string[]): CityInfo {
+function ArrayToCityInto(input: string[], similarValue: number): CityInfo {
   const newCityInfo: CityInfo = {
     city: input[0],
     city_ascii: input[1],
@@ -69,9 +72,22 @@ function ArrayToCityInto(input: string[]): CityInfo {
     lng: parseFloat(input[6]),
     ranking: parseInt(input[7]),
     id: parseInt(input[8]),
+    similar_value: similarValue,
   };
   return newCityInfo;
 };
+
+function SortMostSimiliarCities(cityInfo: CityInfo[]): CityInfo[] {
+  function CompareSimiliarValues(a: CityInfo, b: CityInfo): number {
+    return a.similar_value - b.similar_value;
+  }
+
+  function CompareRankingValues(a: CityInfo, b: CityInfo): number {
+    return a.ranking + b.ranking;
+  }
+
+  return cityInfo.sort(CompareSimiliarValues).slice(0, 5).sort(CompareRankingValues);
+}
 
 async function FindMostSimiliarCities(message: string): Promise<CityInfo[]> {
 
@@ -83,9 +99,9 @@ async function FindMostSimiliarCities(message: string): Promise<CityInfo[]> {
     fs.createReadStream(filePath)
       .pipe(parse({ delimiter: ",", from_line: 2 }))
       .on('data', function (row) {
-        const length = CitySuggestion(message, row[1]);
-        if (length <= 3) {
-          similarCityNames.push(ArrayToCityInto(row));
+        const similarValue = CitySuggestion(message, row[1]);
+        if (similarValue <= 3) {
+          similarCityNames.push(ArrayToCityInto(row, similarValue));
         }
       })
       .on('end', function () {

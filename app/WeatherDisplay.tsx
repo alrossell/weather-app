@@ -11,7 +11,9 @@ const WeatherDisplay: React.FC<CarouselProps> = ({ weatherInfo }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
-    setCurrentSlide(0);
+    if (weatherInfo.length != 0) {
+      setCurrentSlide(weatherInfo.length - 1);
+    }
   }, [weatherInfo]);
 
   const nextSlide = () => {
@@ -23,30 +25,42 @@ const WeatherDisplay: React.FC<CarouselProps> = ({ weatherInfo }) => {
   };
 
 
-  if (!weatherInfo || weatherInfo.length === 0) {
+  const DisplayWeatherTile = () => {
     return (
-      <div className="mt-10 flex space-x-4">
-        <div className="flex space-x-6">
-          <button className="text-xl" onClick={prevSlide}><FiChevronLeft /></button>
-          <div className='flex flex-col space-y-4 items-center justify-center'>
-            <p>{"Enter a City"}</p>
-            <p>{"Please"}</p>
+      <div className="flex w-64  transition-transform duration-500 ease-in-out transform -translate-x-full" style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
+        {weatherInfo.length == 0 ?
+          <div className="w-full flex-shrink-0">
+            <div className="bg-white h-32 flex flex-col items-center justify-center">
+              <div className="flex flex-col items-center justify-center">
+                <p className="text-xl">Enter a city</p>
+                <p className="text-xl">Please</p>
+              </div>
+            </div>
           </div>
-          <button className="text-xl" onClick={nextSlide}><FiChevronRight /></button>
-        </div>
+          :
+          weatherInfo.map((item) => (
+            <div key={item.id} className="w-full flex-shrink-0">
+              <div className="bg-white h-32 flex flex-col items-center justify-center">
+                <div className="flex flex-col items-center justify-center">
+                  <p className="text-xl m-1">{item.city}</p>
+                  <p className="text-xl m-1">{item.weather}</p>
+                  <p className="m-1">{item.state_name}</p>
+                </div>
+              </div>
+            </div>
+          ))}
       </div>
-    );
+    )
   }
 
   return (
-    <div className="mt-10 flex space-x-4">
-      <div className="flex space-x-6">
-        <button className="text-xl" onClick={prevSlide}><FiChevronLeft /></button>
-        <div className='flex flex-col space-y-4 items-center justify-center'>
-          <p>{weatherInfo[currentSlide].city}</p>
-          <p>{weatherInfo[currentSlide].weather}</p>
-        </div>
-        <button className="text-xl" onClick={nextSlide}><FiChevronRight /></button>
+    <div className="flex flex-col items-center justify-center">
+      <div className="relative w-full overflow-hidden max-w-lg mx-auto">
+        {DisplayWeatherTile()}
+      </div>
+      <div className="m-2 items-center justify-center">
+        <button className="text-3xl" onClick={prevSlide}><FiChevronLeft /></button>
+        <button className="text-3xl" onClick={nextSlide}><FiChevronRight /></button>
       </div>
     </div>
   );
